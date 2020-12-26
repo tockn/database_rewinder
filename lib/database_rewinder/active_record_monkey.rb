@@ -7,9 +7,9 @@ module DatabaseRewinder
       super
     end
 
-    def exec_query(sql, *)
+    def exec_query(sql, name, binds, prepare: false)
       DatabaseRewinder.record_inserted_table self, sql
-      super
+      super(sql, name, binds, prepare: prepare)
     end
   end
 end
