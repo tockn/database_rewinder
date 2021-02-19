@@ -21,6 +21,15 @@ module DatabaseRewinder
       Cleaner.new(config: config, connection_name: connection_name, only: @only, except: @except).tap {|c| @cleaners << c}
     end
 
+    def create_cleaners(connection_name)
+      configs = get_configs_from(connection_name)
+      raise %Q[Database configuration named "#{connection_name}" is not configured.] if configs.empty?
+
+      configs.each do |config|
+        Cleaner.new(config: config, connection_name: connection_name, only: @only, except: @except).tap {|c| @cleaners << c}
+      end
+    end
+
     def [](connection)
       @cleaners.detect {|c| c.connection_name == connection} || create_cleaner(connection)
     end
@@ -88,6 +97,10 @@ module DatabaseRewinder
       else
         database_configuration[connection_name]
       end
+    end
+
+    def get_configs_from(connection_name)
+      database_configuration.configs_for(env_name: connection_name).map(&:configuration_hash)
     end
 
     def get_cache_key(connection_pool)
